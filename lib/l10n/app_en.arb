@@ -1,0 +1,17 @@
+{
+  "newsApp":"News App",
+   "language":"Language",
+   "english":"English",
+   "arabic":"Arabic",
+   "categories":"Categories",
+   "settings":"Settings",
+   "health":"Health",
+   "business":"Business",
+   "environment":"Environment",
+   "science":"Scrience",
+   "general":"General",
+   "technology":"Technology"
+
+
+
+}

@@ -1,0 +1,15 @@
+{
+  "newsApp":"الاخبار",
+  "language":"اللغه",
+  "english":"اللغه الانجليزيه",
+  "arabic":"اللغه العربيه",
+  "categories":"فئه الاخبار",
+  "settings":"الاعدادات",
+  "health":"الصحه",
+   "business":"التجاره",
+   "environment":"البيئه",
+   "science":"العلم",
+   "general":"عام",
+   "technology":"تكنولوجيا"
+
+}
