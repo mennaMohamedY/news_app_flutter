@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../api_utiles/api_manager.dart';
 import '../../model/NewsResponse.dart';
 import '../../mytheme.dart';
-import 'singlenews_design.dart';
+import 'articles/singlenews_design.dart';
 
 class MYArticles extends StatefulWidget{
   String sourceID;

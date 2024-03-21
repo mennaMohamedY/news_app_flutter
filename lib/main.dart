@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:newsapp/home/articledetails/article_details.dart';
 import 'package:newsapp/home/categories/categories_screen.dart';
 import 'package:newsapp/home/home_screen.dart';
-import 'package:newsapp/home/news/category_details.dart';
+import 'package:newsapp/home/news/resources/category_details.dart';
 import 'package:newsapp/home/settings/settings_screen.dart';
 import 'package:newsapp/mytheme.dart';
 import 'package:newsapp/providers/provider.dart';
