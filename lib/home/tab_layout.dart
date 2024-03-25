@@ -1,8 +1,8 @@
 
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:newsapp/home/news/articles.dart';
-import 'package:newsapp/home/news/category_details.dart';
+import 'package:newsapp/home/news/bloc/articles/articles.dart';
+import 'package:newsapp/home/news/bloc/sources/category_details.dart';
 import 'package:newsapp/home/news/singlenews_design.dart';
 import 'package:newsapp/home/news/tryofsearch.dart';
 import 'package:newsapp/home/singletab_design.dart';

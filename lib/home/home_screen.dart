@@ -6,7 +6,7 @@ import 'package:newsapp/home/categories/categories_screen.dart';
 import 'package:newsapp/home/categories/cateory_dm.dart';
 import 'package:newsapp/home/drawer/sidedrawer.dart';
 import 'package:newsapp/home/errorwidget.dart';
-import 'package:newsapp/home/news/category_details.dart';
+import 'package:newsapp/home/news/bloc/sources/category_details.dart';
 import 'package:newsapp/home/settings/settings_screen.dart';
 import 'package:newsapp/home/news/singlenews_design.dart';
 import 'package:newsapp/home/tab_layout.dart';

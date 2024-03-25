@@ -1,15 +1,18 @@
 
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:newsapp/home/news/bloc/sources/sources_viewmodel.dart';
+import 'package:newsapp/home/news/bloc/states/states.dart';
 import 'package:newsapp/home/news/singlenews_design.dart';
 import 'package:newsapp/home/tab_layout.dart';
 import 'package:provider/provider.dart';
 
-import '../../api_utiles/api_manager.dart';
-import '../../model/NewsResponse.dart';
-import '../../model/SourceResponse.dart';
-import '../../mytheme.dart';
-import '../../providers/provider.dart';
+import '../../../../api_utiles/api_manager.dart';
+import '../../../../model/NewsResponse.dart';
+import '../../../../model/SourceResponse.dart';
+import '../../../../mytheme.dart';
+import '../../../../providers/provider.dart';
 
 class NewsScreen extends StatefulWidget {
 
@@ -23,10 +26,17 @@ class NewsScreen extends StatefulWidget {
 
 class _NewsScreenState extends State<NewsScreen> {
 
-  List<Sources> sourcesList=[];
+  //List<Sources> sourcesList=[];
   List<Articles> articlesList=[];
 
 
+  SourcesViewModel sourcesViewModel=SourcesViewModel();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    sourcesViewModel.getResources(widget.categoryID);
+  }
   @override
   Widget build(BuildContext context) {
     var newsProvider=Provider.of<NewsProvider>(context);
@@ -36,7 +46,43 @@ class _NewsScreenState extends State<NewsScreen> {
         ),
           Container(
             padding: EdgeInsets.all(12),
-            child: FutureBuilder(
+            child: BlocBuilder<SourcesViewModel,SourceStates>(
+              bloc: sourcesViewModel,
+              builder:(context,state){
+                if(state is LoadingState){
+                  return Center(child: CircularProgressIndicator(color: MyTheme.primaryColor),);
+                }
+                else if(state is ErrorState){
+                  return Column(children: [
+                    Text(state.errorMSg,style: TextStyle(color: Colors.red),),
+                    SizedBox(height: 22,),
+                    Center(child: ElevatedButton(onPressed: () {
+                      sourcesViewModel.getResources(widget.categoryID);
+                    },
+                      child: Text("Try Again !",style: TextStyle(fontSize: 17),),
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)),
+                            side: BorderSide(color: MyTheme.primaryColor,width: 2),
+                          ), backgroundColor: MyTheme.primaryColor
+                      ),),)
+                  ],);
+                }
+                else if(state is SuccessState){
+                  return  TabLayout(sourcesList: state.sourcesList);
+                }
+                else{
+                  return Container();
+                }
+
+              },),
+          )
+        ]);
+  }
+
+}
+
+/*
+FutureBuilder(
                 future:APIManager.getResources(widget.categoryID) ,
                 builder:(BuildContext context, snapshot){
                   if(snapshot.connectionState == ConnectionState.waiting){
@@ -84,9 +130,5 @@ class _NewsScreenState extends State<NewsScreen> {
                   sourcesList=snapshot.data!.sources!;
                   return  TabLayout(sourcesList: sourcesList);
 
-                } ),
-          )
-        ]);
-  }
-
-}
+                } )
+ */

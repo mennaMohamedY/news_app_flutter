@@ -1,8 +1,9 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:newsapp/home/articledetails/article_details.dart';
 import 'package:newsapp/home/categories/categories_screen.dart';
 import 'package:newsapp/home/home_screen.dart';
-import 'package:newsapp/home/news/category_details.dart';
+import 'package:newsapp/home/news/bloc/sources/category_details.dart';
 import 'package:newsapp/home/settings/settings_screen.dart';
 import 'package:newsapp/mytheme.dart';
 import 'package:newsapp/providers/provider.dart';
@@ -10,11 +11,16 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'home/news/bloc/mybloc_observer.dart';
+
 void main() {
+  Bloc.observer = MyBlocObserver();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (BuildContext)=>NewsProvider())
   ],child: MyApp(),));
 }
+
+
 
 class MyApp extends StatelessWidget {
 
