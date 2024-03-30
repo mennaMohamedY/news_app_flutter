@@ -3,6 +3,9 @@
 import 'package:easy_search_bar/easy_search_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:newsapp/home/news/bloc/articles/articles_viewmodel.dart';
+import 'package:newsapp/home/news/bloc/states/states.dart';
 import 'package:newsapp/providers/provider.dart';
 import 'package:provider/provider.dart';
 
@@ -30,6 +33,8 @@ class _MYSearchState extends State<MYSearch> {
   List<Articles> articlesList=[];
   ScrollController _scrollController = ScrollController();
   final TextEditingController searchcontroller=TextEditingController();
+  ArticlesViewModel articlesViewModel=ArticlesViewModel();
+
 
   List<Articles> searchList=[];
   bool notFound=false;
@@ -54,23 +59,18 @@ class _MYSearchState extends State<MYSearch> {
         }
       });
     }
-    // setState(() {
-    //   items = list
-    //       .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-    //       .toList();
-    //   print(searchResult.length);});
-
   }
 
 
   @override
   void initState() {
     super.initState();
-    //_scrollController.addListener(_loadMoreData);
-    fetch();
+    //fetch();
+    articlesViewModel.getArticlesBySourceID(widget.sourceID);
     _scrollController.addListener((){
       if(_scrollController.offset == _scrollController.position.maxScrollExtent){
-        fetch();
+      //  fetch();
+        articlesViewModel.fetch(widget.sourceID, widget.pageSize, widget.pageNum);
       }});
       searchcontroller.addListener(QueryListener);
 
@@ -86,53 +86,39 @@ class _MYSearchState extends State<MYSearch> {
       searchcontroller.dispose();
     super.dispose();
   }
-  void _loadMoreData() async{
-    print('${articlesList.length}');
-    if (_scrollController.offset == _scrollController.position.maxScrollExtent) {
-      widget.pageSize+=20;
-      widget.count +=20;
-      if(widget.count ==100){
-        widget.count=0;
-        widget.pageNum +=1;
-      }
-      fetch();
-      // User has reached the end of the list
-      // Load more data or trigger pagination in flutter
-
-      // var articlesResponse=await APIManager.loadMoreArticles(widget.sourceID, widget.pageNum);
-      // var newArticlesList=articlesResponse.articles;
-
-      //articlesList = List.from(articlesList)..addAll(newArticlesList as Iterable<Articles>);
-      //var newList = [...articlesList, ...?newArticlesList];
-      setState(() {
-        //articlesList = List.from(articlesList)..addAll(newArticlesList as Iterable<Articles>);
-        //articlesList=newList;
-        print('${articlesList.length}');
-
-      });
-    }
-  }
-  void fetch()async{
-    var articlesResponse=await APIManager.getNews(widget.sourceID,widget.pageSize.toString(),widget.pageNum.toString());
-    var newArticlesList=articlesResponse.articles;
-    widget.controllerFlag=1;
-
-    setState(() {
-      widget.pageSize =20;
-      widget.pageNum +=1;
-      articlesList.addAll(newArticlesList!.map((article) {
-        return article;
-      }).toList());
-    });
-
-  }
+  // void _loadMoreData() async{
+  //   print('${articlesList.length}');
+  //   if (_scrollController.offset == _scrollController.position.maxScrollExtent) {
+  //     widget.pageSize+=20;
+  //     widget.count +=20;
+  //     if(widget.count ==100){
+  //       widget.count=0;
+  //       widget.pageNum +=1;
+  //     }
+  //     fetch();
+  //     setState(() {
+  //       print('${articlesList.length}');
+  //     });
+  //   }
+  // }
+  // void fetch()async{
+  //   var articlesResponse=await APIManager.getNews(widget.sourceID,widget.pageSize.toString(),widget.pageNum.toString());
+  //   var newArticlesList=articlesResponse.articles;
+  //   widget.controllerFlag=1;
+  //
+  //   setState(() {
+  //     widget.pageSize =20;
+  //     widget.pageNum +=1;
+  //     articlesList.addAll(newArticlesList!.map((article) {
+  //       return article;
+  //     }).toList());
+  //   });
+  // }
   void onQueryChanged(String query) {
     setState(() {
       searchList = articlesList
           .where((item) => item.title!.toLowerCase().contains(query.toLowerCase()))
           .toList();
-     // notFound=true;
-
       if(query.isNotEmpty && searchList.isEmpty){
        // notFound=true;
       }
@@ -142,25 +128,72 @@ class _MYSearchState extends State<MYSearch> {
   @override
   Widget build(BuildContext context) {
     var provider=Provider.of<NewsProvider>(context);
-    //var provider=Provider.of<NewsProvider>(context);
     print ("provider: ${provider.searchQuery}");
     search(provider.searchQuery);
+    return  BlocBuilder(
+      bloc: articlesViewModel,
+      builder:(context,state){
+        if(state is LoadingState){
+          return Center(child: CircularProgressIndicator(color: MyTheme.primaryColor),);
+        }
+        else if(state is ErrorState){
+          return Column(children: [
 
-    // if(provider.searchQuery.isNotEmpty){
-    //   // widget.isVisible=true;
-    //   // setState(() {
-    //   //
-    //   // });
-    //
-    //   search(provider.searchQuery);
-    // }
+            Text(state.errorMSg,style: TextStyle(color: Colors.red),),
+            Center(child: ElevatedButton(onPressed: () {
+              articlesViewModel.getArticlesBySourceID(widget.sourceID);
+            },
+              child: Text("Try Again!",style: TextStyle(fontSize: 18),),
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)),
+                    side: BorderSide(color: MyTheme.primaryColor,width: 2),
+                  ), backgroundColor: MyTheme.primaryColor
+              ),),)
+          ],);
+        }
+        else if(state is SuccessArticlesState){
+          return Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
 
-    ///leh 3mlna kda 3lshan al futurebuilder bt3ml build llwidget kolaha mn awl wgded w bt3ml load llList
-    ///fa bltaly kol mara h3ml scroll kan kan bytl3le fo2 khales w lazm anzl tany
-    ///lakn fl listview lma bnstkhdmha fa lma alitem gded bydaf m3 alcontroller hwa byrouh yhmlo
-    ///w htena alfutureBuilder bflag 3lshan lma adous 3ala source gded mhtag arouh a3ml rebuild
 
-    return (widget.controllerFlag !=0)?
+              itemBuilder: (BuildContext context, int position){
+                articlesList=state.articlesList;
+                articlesViewModel.articlesList=state.articlesList;
+                if(position < state.articlesList.length){
+                  //need to pass the articles
+
+                  return SingleNewsDesign(article: state.articlesList[position],);
+                }else{
+                  return Center(child: CircularProgressIndicator(color: MyTheme.primaryColor),);
+                }
+              },itemCount: state.articlesList.length+1,
+              scrollDirection: Axis.vertical,
+            ),
+          );
+        }
+        else{
+          return Container();
+        }
+      },);
+  }
+
+
+
+
+void searchlistener(){
+  var provider=Provider.of<NewsProvider>(context);
+
+  if(provider.searchQuery.isNotEmpty){
+    widget.isVisible=true;
+    setState(() {
+
+    });
+  }
+}
+}
+/*
+ (widget.controllerFlag !=0)?
     ListView.builder(
       shrinkWrap: true,
       controller: _scrollController,
@@ -233,73 +266,52 @@ class _MYSearchState extends State<MYSearch> {
             scrollDirection: Axis.vertical,
           );
         } );
-  }
+ */
+/*
+BlocBuilder(
+      bloc: articlesViewModel,
+        builder:(context,state){
+        if(state is LoadingState){
+          return Center(child: CircularProgressIndicator(color: MyTheme.primaryColor),);
+        }
+        else if(state is ErrorState){
+          return Column(children: [
 
-  // void OnSearchListener(){
-  //   var provider=Provider.of<NewsProvider>(context);
-  //
-  //   provider.QueryListener=(String query){
-  //
-  //     if(provider.searchQuery.isNotEmpty){
-  //
-  //       setState(() {
-  //         searchList = articlesList
-  //             .where((item) => item.author!.toLowerCase().contains(query.toLowerCase()))
-  //             .toList();
-  //         notFound=true;
-  //         widget.controllerFlag=1;
-  //         provider.getSearchQuery();
-  //
-  //
-  //
-  //         if(query.isNotEmpty && searchList.isEmpty){
-  //           notFound=true;
-  //         }
-  //
-  //       });
-  //
-  //     }
-  //   };
-  // }
-  //
-  //
-  // void OnSearch(String query){
-  //   var provider=Provider.of<NewsProvider>(context);
-  //
-  //   if(provider.searchQuery.isNotEmpty){
-  //
-  //     setState(() {
-  //       searchList = articlesList
-  //           .where((item) => item.author!.toLowerCase().contains(query.toLowerCase()))
-  //           .toList();
-  //       notFound=true;
-  //       widget.controllerFlag=1;
-  //       provider.getSearchQuery();
-  //
-  //
-  //
-  //       if(query.isNotEmpty && searchList.isEmpty){
-  //         notFound=true;
-  //       }
-  //
-  //     });
-  //
-  //
-  //   }
-  // }
+            Text(state.errorMSg,style: TextStyle(color: Colors.red),),
+            Center(child: ElevatedButton(onPressed: () {
+              articlesViewModel.getArticlesBySourceID(widget.sourceID);
+            },
+              child: Text("Try Again!",style: TextStyle(fontSize: 18),),
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)),
+                    side: BorderSide(color: MyTheme.primaryColor,width: 2),
+                  ), backgroundColor: MyTheme.primaryColor
+              ),),)
+          ],);
+        }
+        else if(state is SuccessArticlesState){
+          return Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
 
 
+              itemBuilder: (BuildContext context, int position){
+                articlesList=state.articlesList;
+                articlesViewModel.articlesList=state.articlesList;
+                if(position < state.articlesList.length){
+                  //need to pass the articles
 
-
-
-void searchlistener(){
-  var provider=Provider.of<NewsProvider>(context);
-
-  if(provider.searchQuery.isNotEmpty){
-    widget.isVisible=true;
-    setState(() {
-
-    });
-  }
-}
-}
+                  return SingleNewsDesign(article: state.articlesList[position],);
+                }else{
+                  return Center(child: CircularProgressIndicator(color: MyTheme.primaryColor),);
+                }
+              },itemCount: state.articlesList.length+1,
+              scrollDirection: Axis.vertical,
+            ),
+          );
+        }
+        else{
+          return Container();
+        }
+        },);
+ */

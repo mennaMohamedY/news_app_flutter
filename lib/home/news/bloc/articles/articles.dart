@@ -4,6 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsapp/home/news/bloc/articles/articles_viewmodel.dart';
+import 'package:newsapp/home/news/bloc/articles/repository/articles_datasource/articles_datasourceimpl.dart';
+import 'package:newsapp/home/news/bloc/articles/repository/articles_datasource/articles_repositoryimpl.dart';
+import 'package:newsapp/home/news/bloc/articles/repository/articles_repository/articles_repository.dart';
 import 'package:newsapp/home/news/bloc/states/states.dart';
 import 'package:newsapp/providers/provider.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +37,7 @@ class _MYArticlesState extends State<MYArticles> {
   bool notFound=false;
 
 
+  ArticlesViewModel articlesViewModel=ArticlesViewModel();
 
 
   @override
@@ -43,7 +47,8 @@ class _MYArticlesState extends State<MYArticles> {
     //fetch();
     _scrollController.addListener((){
     if(_scrollController.offset == _scrollController.position.maxScrollExtent){
-       fetch();
+       //fetch();
+      articlesViewModel.fetch(widget.sourceID, widget.pageSize, widget.pageNum);
     }});
   }
 
@@ -53,22 +58,26 @@ class _MYArticlesState extends State<MYArticles> {
     super.dispose();
   }
   //but this function in the viewmodel
+  // APIManager apiManager = APIManager();
+  // ArticlesRemoteDataSourceInterface articlesRemoteDataSourceInterface =ArticlesRemoteDataSourceImpl(apiManager:apiManager );
+  //
+  // ArticlesRepositoryInterface articlesRepositoryInterface = ArticlesRepositoryImpl(articlesRemoteDataSourceInterface: articlesRemoteDataSourceInterface)
 
+  // void fetch()async{
+  //
+  //   widget.pageSize =15;
+  //   widget.pageNum +=1;
+  //
+  //   var articlesResponse=await APIManager.getNews(widget.sourceID,widget.pageSize.toString(),widget.pageNum.toString());
+  //
+  //   var newArticlesList=articlesResponse.articles;
+  //   setState(() {
+  //     articlesList.addAll(newArticlesList!.map((article) {
+  //       return article;
+  //     }).toList());
+  //   });
+  // }
 
-  void fetch()async{
-    widget.pageSize =15;
-    widget.pageNum +=1;
-
-    var articlesResponse=await APIManager.getNews(widget.sourceID,widget.pageSize.toString(),widget.pageNum.toString());
-    var newArticlesList=articlesResponse.articles;
-    setState(() {
-      articlesList.addAll(newArticlesList!.map((article) {
-        return article;
-      }).toList());
-    });
-  }
-
-  ArticlesViewModel articlesViewModel=ArticlesViewModel();
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +110,7 @@ class _MYArticlesState extends State<MYArticles> {
 
               itemBuilder: (BuildContext context, int position){
                 articlesList=state.articlesList;
+                articlesViewModel.articlesList=state.articlesList;
                 if(position < state.articlesList.length){
                   //need to pass the articles
 
